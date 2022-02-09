@@ -11,5 +11,8 @@ examples:
     type test.json | getJSONX .
     getJSONX . < test.json
 
-Home:
+Home
 https://github.com/lifenjoiner/getJSONX
+
+Compiling dependency
+https://github.com/zserge/jsmn

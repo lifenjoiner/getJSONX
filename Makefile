@@ -11,7 +11,7 @@ all: $(program)
 	$(CC) -c $(CFLAGS) $< -o $@
 
 %$(EXECSUFFIX): %.o
-	$(CC) -o $@ $(CFLAGS) $^ -ljsmn
+	$(CC) -o $@ $(CFLAGS) $^
 
 test:
 	
