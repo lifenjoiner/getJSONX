@@ -27,38 +27,49 @@ jsmntok_t* jsmn_parse_expr_on_ws(const char* js, const jsmntok_t *tokens, const 
     i = n;
     for (i = 0; i < n; i++) {
         char *pp;
-        int ii, nn;
+        int nn;
         //
+        if (!token) { goto UNKNOWN; }
         opr = str_split(operations.items[i], "[]");
         nn = opr.length;
         //
         switch (nn) {
         case 2:
             pp = opr.items[1];
-            if (token && token->type == JSMN_OBJECT && isdigit(*pp)) {
-                ii = atoi(pp);
+            if (token->type == JSMN_OBJECT && isdigit(*pp)) {
                 token = jsmn_get_sub_object(js, token, opr.items[0]);
                 if (!token) { goto UNKNOWN; }
                 token++;
                 if (token->type != JSMN_ARRAY) { goto UNKNOWN; }
-                token = jsmn_get_array_item(js, token, ii);
+                token = jsmn_get_array_item(js, token, atoi(pp));
             }
             else { goto UNKNOWN; }
             break;
         case 1:
-            if (token && token->type == JSMN_OBJECT) {
-                if ((char)*operations.items[i] != '.') {
-                    token = jsmn_get_sub_object(js, token, operations.items[i]);
+            pp = opr.items[0];
+            if (token->type == JSMN_OBJECT) {
+                if ((char)*pp != '.') {
+                    token = jsmn_get_sub_object(js, token, pp);
                     if (!token) { goto UNKNOWN; }
                     token++;
+                }
+            }
+            else if (token->type == JSMN_ARRAY) {
+                if (!strcmp(pp, "length()")) {
+                    printf("%d\n", token->size);
+                    return NULL;
+                }
+                else if (isdigit(*pp)) {
+                    token = jsmn_get_array_item(js, token, atoi(pp));
                 }
             }
             else { goto UNKNOWN; }
             break;
         default:
 UNKNOWN:
-            printf("Err: %s\n", operations.items[i]);
+            fprintf(stderr, "Err: %s\n", operations.items[i]);
             i = n;
+            token = NULL;
             break;
         }
     }
@@ -68,14 +79,15 @@ UNKNOWN:
 
 //
 void help(const char *app) {
-    printf("Get information from json. v0.2.0 by YX Hao\n");
-    printf("Usage: %s <operations> [json-file]\n", app);
-    printf("operation examples:\n");
-    printf("    [.]a.b.c[0].d\n");
-    printf("    .\n");
-    printf("examples:\n");
-    printf("    type test.json | %s .\n", app);
-    printf("    %s . < test.json\n", app);
+    fprintf(stderr, "Get information from json. v0.2.1 by YX Hao\n");
+    fprintf(stderr, "Usage: %s <operations> [json-file]\n", app);
+    fprintf(stderr, "operation examples:\n");
+    fprintf(stderr, "    [.]a.b.c[0].d\n");
+    fprintf(stderr, "    [.]a.b.c.length()\n");
+    fprintf(stderr, "    .\n");
+    fprintf(stderr, "examples:\n");
+    fprintf(stderr, "    type test.json | %s .\n", app);
+    fprintf(stderr, "    %s . < test.json\n", app);
     exit(EXIT_FAILURE);
 }
 
@@ -94,7 +106,7 @@ int main(int argc, const char** argv) {
         filename = argv[2];
         fp = fopen(filename, "r");
         if (!fp) {
-            printf("File not found: %s\n", filename);
+            fprintf(stderr, "File not found: %s\n", filename);
             exit(EXIT_FAILURE);
         }
     }
