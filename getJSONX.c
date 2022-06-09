@@ -24,7 +24,6 @@ jsmntok_t* jsmn_parse_expr_on_ws(const char* js, const jsmntok_t *tokens, const 
     n = operations.length;
     //
     token = (jsmntok_t*)tokens;
-    i = n;
     for (i = 0; i < n; i++) {
         char *pp;
         int nn;
@@ -33,19 +32,7 @@ jsmntok_t* jsmn_parse_expr_on_ws(const char* js, const jsmntok_t *tokens, const 
         opr = str_split(operations.items[i], "[]");
         nn = opr.length;
         //
-        switch (nn) {
-        case 2:
-            pp = opr.items[1];
-            if (token->type == JSMN_OBJECT && isdigit(*pp)) {
-                token = jsmn_get_sub_object(js, token, opr.items[0]);
-                if (!token) { goto UNKNOWN; }
-                token++;
-                if (token->type != JSMN_ARRAY) { goto UNKNOWN; }
-                token = jsmn_get_array_item(js, token, atoi(pp));
-            }
-            else { goto UNKNOWN; }
-            break;
-        case 1:
+        if (nn == 1) {
             pp = opr.items[0];
             if (token->type == JSMN_OBJECT) {
                 if ((char)*pp != '.') {
@@ -59,20 +46,35 @@ jsmntok_t* jsmn_parse_expr_on_ws(const char* js, const jsmntok_t *tokens, const 
                     printf("%d\n", token->size);
                     return NULL;
                 }
-                else if (isdigit(*pp)) {
+                else if (isdigit(*pp)) { // top level array
                     token = jsmn_get_array_item(js, token, atoi(pp));
                 }
             }
             else { goto UNKNOWN; }
-            break;
-        default:
+        }
+        else if (nn > 1) {
+            int j;
+            for (j = 0; j < nn - 1; j++) {
+                pp = opr.items[j + 1];
+                if (!isdigit(*pp)) { goto UNKNOWN; }
+                if (j == 0 && token->type == JSMN_OBJECT) {
+                    token = jsmn_get_sub_object(js, token, opr.items[j]);
+                    if (!token) { goto UNKNOWN; }
+                    token++;
+                }
+                if (token->type != JSMN_ARRAY) { goto UNKNOWN; }
+                token = jsmn_get_array_item(js, token, atoi(pp));
+            }
+        }
+        else {
 UNKNOWN:
             fprintf(stderr, "Err: %s\n", operations.items[i]);
             i = n;
             token = NULL;
-            break;
         }
+        vector_free(&opr);
     }
+    vector_free(&operations);
     //"." = root
     return token;
 }

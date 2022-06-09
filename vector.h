@@ -9,6 +9,14 @@ typedef struct{
     size_t capacity;
 } Vector;
 
+void vector_free(Vector *v) {
+    size_t i;
+    for (i = 0; i < v->length; i++) {
+        free(v->items[i]);
+    }
+    free(v->items);
+}
+
 Vector str_split(const char* str, const char* delims) {
     Vector Str;
     char *str_t, *p;
@@ -17,19 +25,17 @@ Vector str_split(const char* str, const char* delims) {
     str_t = strdup(str);
     //
     Str.length = 0;
-    Str.items = calloc(1, sizeof(char*));
-    Str.items[0] = str_t;
+    Str.items = NULL;
     //
-    p = strtok(str_t, delims);
-    while (p != NULL) {
+    for (p = str_t; p = strtok(p, delims); p != NULL) {
         pp = realloc(Str.items, sizeof(char*) * (Str.length+1));
         //assert(pp != NULL);
         Str.items = pp;
-        Str.items[Str.length] = p;
+        Str.items[Str.length] = strdup(p);
         Str.length++;
-        p = strtok(NULL, delims);
+        p = NULL;
     }
-    if (Str.length == 0) {Str.length = 1;}
+    free(str_t);
     return Str;
 }
 
