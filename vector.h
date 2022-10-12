@@ -15,6 +15,8 @@ void vector_free(Vector *v) {
         free(v->items[i]);
     }
     free(v->items);
+    v->length = 0;
+    v->items = NULL;
 }
 
 Vector str_split(const char* str, const char* delims) {
