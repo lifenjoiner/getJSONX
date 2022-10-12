@@ -81,7 +81,7 @@ UNKNOWN:
 
 //
 void help(const char *app) {
-    fprintf(stderr, "Get information from json. v0.2.2 by YX Hao\n");
+    fprintf(stderr, "Get information from json. v0.2.3 by YX Hao\n");
     fprintf(stderr, "Usage: %s <operations> [json-file]\n", app);
     fprintf(stderr, "operation examples:\n");
     fprintf(stderr, "    [.]a.b.c[0].d\n");
