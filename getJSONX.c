@@ -20,7 +20,7 @@ jsmntok_t* jsmn_parse_expr_on_ws(const char* js, const jsmntok_t *tokens, const 
     size_t i, n;
     jsmntok_t *token;
     //
-    operations = str_split(expr, ".");
+    operations = _tcs_split(expr, ".");
     n = operations.length;
     //
     token = (jsmntok_t*)tokens;
@@ -29,7 +29,7 @@ jsmntok_t* jsmn_parse_expr_on_ws(const char* js, const jsmntok_t *tokens, const 
         int nn;
         //
         if (!token) { goto UNKNOWN; }
-        opr = str_split(operations.items[i], "[]");
+        opr = _tcs_split(operations.items[i], "[]");
         nn = opr.length;
         //
         if (nn == 1) {

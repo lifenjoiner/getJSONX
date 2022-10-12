@@ -1,5 +1,6 @@
 //
 #include <malloc.h>
+#include <tchar.h>
 #include <string.h>
 //#include <assert.h>
 
@@ -19,23 +20,22 @@ void vector_free(Vector *v) {
     v->items = NULL;
 }
 
-Vector str_split(const char* str, const char* delims) {
+Vector _tcs_split(const _TCHAR* str, const _TCHAR* delims) {
     Vector Str;
-    char *str_t, *p;
-    void **pp;
+    _TCHAR *str_t, *p;
+    void *pp;
     //
-    str_t = strdup(str);
+    str_t = _tcsdup(str);
     //
     Str.length = 0;
     Str.items = NULL;
     //
-    for (p = str_t; p = strtok(p, delims); p != NULL) {
-        pp = realloc(Str.items, sizeof(char*) * (Str.length+1));
+    for (p = str_t; p = _tcstok(p, delims), p != NULL; p = NULL) {
+        pp = realloc(Str.items, sizeof(void*) * (Str.length+1));
         //assert(pp != NULL);
-        Str.items = pp;
-        Str.items[Str.length] = strdup(p);
+        Str.items = (void **)pp;
+        Str.items[Str.length] = _tcsdup(p);
         Str.length++;
-        p = NULL;
     }
     free(str_t);
     return Str;
@@ -48,7 +48,7 @@ int array_in_array(Vector *arr_v, Vector *arr_s) {
     for (i = 0; i < arr_s->length; i++) {
         flag_i = 0;
         for (j = 0; j < arr_v->length; j++) {
-            if (strcmp(arr_s->items[i], arr_v->items[j]) == 0) {
+            if (_tcscmp((_TCHAR*)arr_s->items[i], (_TCHAR*)arr_v->items[j]) == 0) {
                 flag_i = 1;
                 break;
             }
